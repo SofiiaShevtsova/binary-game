@@ -8,10 +8,14 @@ const fighterDetailsMap = new Map();
 
 export async function getFighterInfo(fighterId) {
     if (fighterDetailsMap.has(fighterId)) {
-        fighterDetailsMap.get(fighterId);
-    } else {
+        return fighterDetailsMap.get(fighterId);
+    }
+    try {
         const info = await fighterService.getFighterDetails(fighterId);
         fighterDetailsMap.set(fighterId, info);
+        return fighterDetailsMap.get(fighterId);
+    } catch (error) {
+        throw error;
     }
 }
 
