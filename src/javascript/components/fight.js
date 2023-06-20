@@ -40,9 +40,6 @@ function throttleFunction(func) {
     if (idThrottle) {
         return;
     }
-    if (idThrottle === null) {
-        func();
-    }
 
     idThrottle = setTimeout(() => {
         func();

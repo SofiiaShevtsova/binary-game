@@ -11,7 +11,7 @@ export default function showWinnerModal(fighter) {
         title: `${fighter.name} win this battle!`,
         bodyElement: fighterBox,
         onClose: () => {
-            // location.reload();
+            // document.querySelector('#root').innerHTML = '';
         }
     };
 
