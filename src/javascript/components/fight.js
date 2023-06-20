@@ -1,7 +1,5 @@
 import controls from '../../constants/controls';
 
-const pressed = new Set();
-
 const fightState = {
     firstFighterHealth: 100,
     secondFighterHealth: 100,
@@ -12,6 +10,9 @@ const fightState = {
         this.firstFighterHealth -= loseHealth;
     }
 };
+
+const pressed = new Set();
+let idThrottle = null;
 
 export function getHitPower(fighter) {
     const { attack } = fighter;
@@ -28,44 +29,66 @@ export function getBlockPower(fighter) {
 }
 
 export function getDamage(attacker, defender) {
-    const damage = getBlockPower(defender) - getHitPower(attacker);
+    const damage = getHitPower(attacker) - getBlockPower(defender);
     if (damage <= 0) {
         return 0;
     }
     return damage;
 }
 
+function throttleFunction(func) {
+    if (idThrottle) {
+        return;
+    }
+    if (idThrottle === null) {
+        func();
+    }
+
+    idThrottle = setTimeout(() => {
+        func();
+        idThrottle = undefined;
+    }, 10000);
+}
+
+function keyDownCobination(fighter) {
+    if (fighter === 'left') {
+        return controls.PlayerOneCriticalHitCombination.every(key => pressed.has(key));
+    }
+    return controls.PlayerTwoCriticalHitCombination.every(key => pressed.has(key));
+}
+
 function fightersHit(firstFighter, secondFighter, resolve) {
     return e => {
         e.preventDefault();
         pressed.add(e.code);
-        if (
-            pressed.has(controls.PlayerOneCriticalHitCombination[0]) &&
-            pressed.has(controls.PlayerOneCriticalHitCombination[1]) &&
-            pressed.has(controls.PlayerOneCriticalHitCombination[2])
-        ) {
-            const loseHealth = (100 / secondFighter.health) * (firstFighter.attack * 2);
-            fightState.setHealth(loseHealth, 'right');
-            document.querySelector('#right-fighter-indicator').style.width = `${
-                fightState.secondFighterHealth < 0 ? 0 : fightState.secondFighterHealth
-            }%`;
+        if (keyDownCobination('left')) {
+            const criticalHit = () => {
+                const loseHealth = (100 / secondFighter.health) * (firstFighter.attack * 2);
+                fightState.setHealth(loseHealth, 'right');
+                document.querySelector('#right-fighter-indicator').style.width = `${
+                    fightState.secondFighterHealth < 0 ? 0 : fightState.secondFighterHealth
+                }%`;
+            };
+
+            throttleFunction(criticalHit);
         }
 
-        if (
-            pressed.has(controls.PlayerTwoCriticalHitCombination[0]) &&
-            pressed.has(controls.PlayerTwoCriticalHitCombination[1]) &&
-            pressed.has(controls.PlayerTwoCriticalHitCombination[2])
-        ) {
-            const loseHealth = (100 / firstFighter.health) * (secondFighter.attack * 2);
-            fightState.setHealth(loseHealth, 'left');
-            document.querySelector('#left-fighter-indicator').style.width = `${
-                fightState.firstFighterHealth < 0 ? 0 : fightState.firstFighterHealth
-            }%`;
+        if (keyDownCobination('right')) {
+            const criticalHit = () => {
+                const loseHealth = (100 / firstFighter.health) * (secondFighter.attack * 2);
+                fightState.setHealth(loseHealth, 'left');
+                document.querySelector('#left-fighter-indicator').style.width = `${
+                    fightState.firstFighterHealth < 0 ? 0 : fightState.firstFighterHealth
+                }%`;
+            };
+            throttleFunction(criticalHit);
         }
 
         if (
             (pressed.has(controls.PlayerOneAttack) && pressed.has(controls.PlayerTwoBlock)) ||
-            (pressed.has(controls.PlayerTwoAttack) && pressed.has(controls.PlayerOneBlock))
+            (pressed.has(controls.PlayerTwoAttack) && pressed.has(controls.PlayerOneBlock)) ||
+            (pressed.has(controls.PlayerOneAttack) && pressed.has(controls.PlayerOneBlock)) ||
+            (pressed.has(controls.PlayerTwoAttack) && pressed.has(controls.PlayerTwoBlock))
         ) {
             return;
         }
