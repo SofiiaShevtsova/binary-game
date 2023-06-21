@@ -29,13 +29,14 @@ export function getDamage(attacker, defender) {
     return damage;
 }
 
-function throttleFunction(func, hit) {
-    if (idThrottle[hit] === null) {
+function throttleFunction(func, position) {
+    if (idThrottle[position] === null) {
         func();
     }
 
-    idThrottle[hit] = setTimeout(() => {
-        idThrottle[hit] = null;
+    idThrottle[position] = setTimeout(() => {
+        idThrottle[position] = null;
+        document.querySelector(`#${position}-fighter-indicator`).style.backgroundColor = '#ebd759';
     }, 10000);
 }
 
@@ -63,6 +64,7 @@ function fightersHit(firstFighter, secondFighter, resolve) {
         if (keyDownCobination('left')) {
             const criticalHit = () => {
                 showDamage(firstFighter, secondFighter, 'right', true);
+                document.querySelector(`#left-fighter-indicator`).style.backgroundColor = 'red';
             };
 
             throttleFunction(criticalHit, 'left');
@@ -71,6 +73,7 @@ function fightersHit(firstFighter, secondFighter, resolve) {
         if (keyDownCobination('right')) {
             const criticalHit = () => {
                 showDamage(secondFighter, firstFighter, 'left', true);
+                document.querySelector(`#right-fighter-indicator`).style.backgroundColor = 'red';
             };
             throttleFunction(criticalHit, 'right');
         }
