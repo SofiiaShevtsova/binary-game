@@ -14,7 +14,7 @@ export function createFighterPreview(fighter, position) {
 <span>Attack:${attack}</span>
 <span>Defence:${defense}</span>
 </div>
-<img src="${source}" alt="${name}" height='300px'>`;
+<img src="${source}" alt="${name}" height='180px'>`;
         fighterElement.innerHTML = template;
     }
     return fighterElement;
