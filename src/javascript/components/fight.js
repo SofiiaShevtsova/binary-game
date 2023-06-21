@@ -5,14 +5,25 @@ const fightState = {
     secondFighterHealth: 100,
     setHealth(loseHealth, fighter) {
         if (fighter === 'right') {
-            this.secondFighterHealth -= loseHealth;
+            if (this.secondFighterHealth < loseHealth) {
+                this.secondFighterHealth = 0;
+            } else {
+                this.secondFighterHealth -= loseHealth;
+            }
         }
-        this.firstFighterHealth -= loseHealth;
+        if (this.firstFighterHealth < loseHealth) {
+            this.firstFighterHealth = 0;
+        } else {
+            this.firstFighterHealth -= loseHealth;
+        }
     }
 };
 
 const pressed = new Set();
-let idThrottle = null;
+const idThrottle = {
+    left: null,
+    right: null
+};
 
 export function getHitPower(fighter) {
     const { attack } = fighter;
@@ -36,14 +47,13 @@ export function getDamage(attacker, defender) {
     return damage;
 }
 
-function throttleFunction(func) {
-    if (idThrottle) {
-        return;
+function throttleFunction(func, hit) {
+    if (idThrottle[hit] === null) {
+        func();
     }
 
-    idThrottle = setTimeout(() => {
-        func();
-        idThrottle = undefined;
+    idThrottle[hit] = setTimeout(() => {
+        idThrottle[hit] = null;
     }, 10000);
 }
 
@@ -67,7 +77,7 @@ function fightersHit(firstFighter, secondFighter, resolve) {
                 }%`;
             };
 
-            throttleFunction(criticalHit);
+            throttleFunction(criticalHit, 'left');
         }
 
         if (keyDownCobination('right')) {
@@ -78,7 +88,7 @@ function fightersHit(firstFighter, secondFighter, resolve) {
                     fightState.firstFighterHealth < 0 ? 0 : fightState.firstFighterHealth
                 }%`;
             };
-            throttleFunction(criticalHit);
+            throttleFunction(criticalHit, 'right');
         }
 
         if (
