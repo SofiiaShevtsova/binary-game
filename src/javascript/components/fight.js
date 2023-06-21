@@ -91,8 +91,8 @@ function fightersHit(firstFighter, secondFighter, resolve) {
             showDamage(secondFighter, firstFighter, 'left');
         }
 
-        if (fightState.getHealth().first <= 0 || fightState.getHealth().second <= 0) {
-            const winner = fightState.getHealth().first <= 0 ? secondFighter : firstFighter;
+        if (fightState.getHealth().left === 0 || fightState.getHealth().right === 0) {
+            const winner = fightState.getHealth().left === 0 ? secondFighter : firstFighter;
             resolve(winner);
         }
     };
@@ -105,7 +105,7 @@ export async function fight(firstFighter, secondFighter) {
         document.addEventListener('keydown', keyDownFun);
         document.addEventListener('keyup', e => {
             pressed.delete(e.code);
-            if (fightState.getHealth().first <= 0 || fightState.getHealth().second <= 0) {
+            if (fightState.getHealth().left === 0 || fightState.getHealth().right === 0) {
                 document.removeEventListener('keydown', keyDownFun);
             }
         });
