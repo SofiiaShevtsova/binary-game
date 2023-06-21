@@ -70,7 +70,7 @@ export default function renderArena(selectedFighters) {
 
     const getWinner = fight(...selectedFighters);
 
-    getWinner.then(value => {
-        return showWinnerModal(value);
+    getWinner.then(winner => {
+        return showWinnerModal(winner);
     });
 }

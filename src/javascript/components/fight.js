@@ -1,23 +1,5 @@
 import controls from '../../constants/controls';
-
-const fightState = {
-    firstFighterHealth: 100,
-    secondFighterHealth: 100,
-    setHealth(loseHealth, fighter) {
-        if (fighter === 'right') {
-            if (this.secondFighterHealth < loseHealth) {
-                this.secondFighterHealth = 0;
-            } else {
-                this.secondFighterHealth -= loseHealth;
-            }
-        }
-        if (this.firstFighterHealth < loseHealth) {
-            this.firstFighterHealth = 0;
-        } else {
-            this.firstFighterHealth -= loseHealth;
-        }
-    }
-};
+import fightState from '../services/fightState';
 
 const pressed = new Set();
 const idThrottle = {
@@ -57,11 +39,21 @@ function throttleFunction(func, hit) {
     }, 10000);
 }
 
-function keyDownCobination(fighter) {
-    if (fighter === 'left') {
+function keyDownCobination(position) {
+    if (pressed.size < 3) {
+        return false;
+    }
+    if (position === 'left') {
         return controls.PlayerOneCriticalHitCombination.every(key => pressed.has(key));
     }
     return controls.PlayerTwoCriticalHitCombination.every(key => pressed.has(key));
+}
+
+function showDamage(attacker, defender, position, critical = false) {
+    const damage = critical ? attacker.attack * 2 : getDamage(attacker, defender);
+    const loseHealth = (100 / defender.health) * damage;
+    fightState.setHealth(loseHealth, position);
+    document.querySelector(`#${position}-fighter-indicator`).style.width = `${fightState.getHealth()[position]}%`;
 }
 
 function fightersHit(firstFighter, secondFighter, resolve) {
@@ -70,11 +62,7 @@ function fightersHit(firstFighter, secondFighter, resolve) {
         pressed.add(e.code);
         if (keyDownCobination('left')) {
             const criticalHit = () => {
-                const loseHealth = (100 / secondFighter.health) * (firstFighter.attack * 2);
-                fightState.setHealth(loseHealth, 'right');
-                document.querySelector('#right-fighter-indicator').style.width = `${
-                    fightState.secondFighterHealth < 0 ? 0 : fightState.secondFighterHealth
-                }%`;
+                showDamage(firstFighter, secondFighter, 'right', true);
             };
 
             throttleFunction(criticalHit, 'left');
@@ -82,11 +70,7 @@ function fightersHit(firstFighter, secondFighter, resolve) {
 
         if (keyDownCobination('right')) {
             const criticalHit = () => {
-                const loseHealth = (100 / firstFighter.health) * (secondFighter.attack * 2);
-                fightState.setHealth(loseHealth, 'left');
-                document.querySelector('#left-fighter-indicator').style.width = `${
-                    fightState.firstFighterHealth < 0 ? 0 : fightState.firstFighterHealth
-                }%`;
+                showDamage(secondFighter, firstFighter, 'left', true);
             };
             throttleFunction(criticalHit, 'right');
         }
@@ -101,20 +85,14 @@ function fightersHit(firstFighter, secondFighter, resolve) {
         }
 
         if (pressed.has(controls.PlayerOneAttack)) {
-            const damage = getDamage(firstFighter, secondFighter);
-            const loseHealth = (100 / secondFighter.health) * damage;
-            fightState.setHealth(loseHealth, 'right');
-            document.querySelector('#right-fighter-indicator').style.width = `${fightState.secondFighterHealth}%`;
+            showDamage(firstFighter, secondFighter, 'right');
         }
         if (pressed.has(controls.PlayerTwoAttack)) {
-            const damage = getDamage(secondFighter, firstFighter);
-            const loseHealth = (100 / firstFighter.health) * damage;
-            fightState.setHealth(loseHealth, 'left');
-            document.querySelector('#left-fighter-indicator').style.width = `${fightState.firstFighterHealth}%`;
+            showDamage(secondFighter, firstFighter, 'left');
         }
 
-        if (fightState.firstFighterHealth <= 0 || fightState.secondFighterHealth <= 0) {
-            const winner = fightState.firstFighterHealth <= 0 ? secondFighter : firstFighter;
+        if (fightState.getHealth().first <= 0 || fightState.getHealth().second <= 0) {
+            const winner = fightState.getHealth().first <= 0 ? secondFighter : firstFighter;
             resolve(winner);
         }
     };
@@ -127,7 +105,7 @@ export async function fight(firstFighter, secondFighter) {
         document.addEventListener('keydown', keyDownFun);
         document.addEventListener('keyup', e => {
             pressed.delete(e.code);
-            if (fightState.firstFighterHealth <= 0 || fightState.secondFighterHealth <= 0) {
+            if (fightState.getHealth().first <= 0 || fightState.getHealth().second <= 0) {
                 document.removeEventListener('keydown', keyDownFun);
             }
         });
