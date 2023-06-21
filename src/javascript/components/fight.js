@@ -1,5 +1,6 @@
 import controls from '../../constants/controls';
 import fightState from '../services/fightState';
+import showControlsInfo from './showControls';
 
 const pressed = new Set();
 const idThrottle = {
@@ -60,6 +61,7 @@ function showDamage(attacker, defender, position, critical = false) {
 function fightersHit(firstFighter, secondFighter, resolve) {
     return e => {
         e.preventDefault();
+        document.querySelector('.player-controls-box').classList.add('hidden');
         pressed.add(e.code);
         if (keyDownCobination('left')) {
             const criticalHit = () => {
@@ -102,6 +104,7 @@ function fightersHit(firstFighter, secondFighter, resolve) {
 }
 
 export async function fight(firstFighter, secondFighter) {
+    showControlsInfo();
     return new Promise(resolve => {
         const keyDownFun = fightersHit(firstFighter, secondFighter, resolve);
 
