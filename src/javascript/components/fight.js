@@ -1,5 +1,6 @@
 import controls from '../../constants/controls';
 import fightState from '../services/fightState';
+import showControlsInfo from './showControls';
 
 const pressed = new Set();
 const idThrottle = {
@@ -29,13 +30,14 @@ export function getDamage(attacker, defender) {
     return damage;
 }
 
-function throttleFunction(func, hit) {
-    if (idThrottle[hit] === null) {
+function throttleFunction(func, position) {
+    if (idThrottle[position] === null) {
         func();
     }
 
-    idThrottle[hit] = setTimeout(() => {
-        idThrottle[hit] = null;
+    idThrottle[position] = setTimeout(() => {
+        idThrottle[position] = null;
+        document.querySelector(`#${position}-fighter-indicator`).style.backgroundColor = '#ebd759';
     }, 10000);
 }
 
@@ -59,10 +61,12 @@ function showDamage(attacker, defender, position, critical = false) {
 function fightersHit(firstFighter, secondFighter, resolve) {
     return e => {
         e.preventDefault();
+        document.querySelector('.player-controls-box').classList.add('hidden');
         pressed.add(e.code);
         if (keyDownCobination('left')) {
             const criticalHit = () => {
                 showDamage(firstFighter, secondFighter, 'right', true);
+                document.querySelector(`#left-fighter-indicator`).style.backgroundColor = 'red';
             };
 
             throttleFunction(criticalHit, 'left');
@@ -71,6 +75,7 @@ function fightersHit(firstFighter, secondFighter, resolve) {
         if (keyDownCobination('right')) {
             const criticalHit = () => {
                 showDamage(secondFighter, firstFighter, 'left', true);
+                document.querySelector(`#right-fighter-indicator`).style.backgroundColor = 'red';
             };
             throttleFunction(criticalHit, 'right');
         }
@@ -99,6 +104,7 @@ function fightersHit(firstFighter, secondFighter, resolve) {
 }
 
 export async function fight(firstFighter, secondFighter) {
+    showControlsInfo();
     return new Promise(resolve => {
         const keyDownFun = fightersHit(firstFighter, secondFighter, resolve);
 

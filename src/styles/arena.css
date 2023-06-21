@@ -61,3 +61,31 @@
   width: 100%;
   background-color: #ebd759;
 }
+
+.player-controls-box{
+  position: fixed;
+  top: 50px;
+  left: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  width: 100%;
+  padding: 50px;
+  background-color: rgba(127, 255, 212, 0.39);
+}
+
+.player-controls-box>h3{
+  width: 100%;
+  text-align: center;
+}
+
+.player-controls-box.hidden{
+  display: none;
+}
+
+.player-controls {
+  color: black;
+  font-size: 20px;
+  width: 45%;
+
+}

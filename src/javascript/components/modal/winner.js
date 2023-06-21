@@ -22,7 +22,8 @@ export default function showWinnerModal(fighter) {
         const attributes = {
             src: fighter.source,
             title: fighter.name,
-            alt: fighter.name
+            alt: fighter.name,
+            height: '60%'
         };
         winnerModal.bodyElement = createElement({
             tagName: 'img',
