@@ -10,8 +10,13 @@ export default function showWinnerModal(fighter) {
     const winnerModal = {
         title: `${fighter.name} win this battle!`,
         bodyElement: fighterBox,
-        onClose: () => {
-            // document.querySelector('#root').innerHTML = '';
+        onClose: hideModal => {
+            const root = document.querySelector('.modal-layer');
+            root.innerHTML = '';
+            const template =
+                '<div class="modal-root"><div class="modal-header"><span>Do you want play again?</span></div><div class="link-box"><a href="/">Yes</a><button class="close-modal">No</button></div></div>';
+            root.innerHTML = template;
+            document.querySelector('.close-modal').addEventListener('click', hideModal);
         }
     };
 
