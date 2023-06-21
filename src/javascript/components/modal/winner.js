@@ -2,12 +2,6 @@ import showModal from './modal';
 import createElement from '../../helpers/domHelper';
 
 export default function showWinnerModal(fighter) {
-    const fighterBox = createElement({ tagName: 'div', className: 'fighter-preview___root' });
-    if (fighter) {
-        const template = `<img src="${fighter.source}" alt="${fighter.name}" height='300px'>`;
-        fighterBox.innerHTML = template;
-    }
-
     const finishedFight = hideModal => {
         const modal = document.querySelector('.modal-layer');
         modal.innerHTML = '';
@@ -18,10 +12,24 @@ export default function showWinnerModal(fighter) {
     };
 
     const winnerModal = {
-        title: `${fighter.name} win this battle!`,
-        bodyElement: fighterBox,
+        title: ``,
+        bodyElement: null,
         onClose: finishedFight
     };
+
+    if (fighter) {
+        winnerModal.title = `${fighter.name} win this battle!`;
+        const attributes = {
+            src: fighter.source,
+            title: fighter.name,
+            alt: fighter.name
+        };
+        winnerModal.bodyElement = createElement({
+            tagName: 'img',
+            className: 'fighter-preview___img',
+            attributes
+        });
+    }
 
     showModal(winnerModal);
 }
