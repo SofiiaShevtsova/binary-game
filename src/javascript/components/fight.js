@@ -56,51 +56,51 @@ function showDamage(attacker, defender, position, critical = false) {
     document.querySelector(`#${position}-fighter-indicator`).style.width = `${fightState.getHealth()[position]}%`;
 }
 
-function fightersHit(firstFighter, secondFighter, resolve) {
-    return e => {
-        e.preventDefault();
-        pressed.add(e.code);
-        if (keyDownCobination('left')) {
-            const criticalHit = () => {
-                showDamage(firstFighter, secondFighter, 'right', true);
-            };
-
-            throttleFunction(criticalHit, 'left');
-        }
-
-        if (keyDownCobination('right')) {
-            const criticalHit = () => {
-                showDamage(secondFighter, firstFighter, 'left', true);
-            };
-            throttleFunction(criticalHit, 'right');
-        }
-
-        if (
-            (pressed.has(controls.PlayerOneAttack) && pressed.has(controls.PlayerTwoBlock)) ||
-            (pressed.has(controls.PlayerTwoAttack) && pressed.has(controls.PlayerOneBlock)) ||
-            (pressed.has(controls.PlayerOneAttack) && pressed.has(controls.PlayerOneBlock)) ||
-            (pressed.has(controls.PlayerTwoAttack) && pressed.has(controls.PlayerTwoBlock))
-        ) {
-            return;
-        }
-
-        if (pressed.has(controls.PlayerOneAttack)) {
-            showDamage(firstFighter, secondFighter, 'right');
-        }
-        if (pressed.has(controls.PlayerTwoAttack)) {
-            showDamage(secondFighter, firstFighter, 'left');
-        }
-
-        if (fightState.getHealth().left === 0 || fightState.getHealth().right === 0) {
-            const winner = fightState.getHealth().left === 0 ? secondFighter : firstFighter;
-            resolve(winner);
-        }
-    };
-}
-
 export async function fight(firstFighter, secondFighter) {
+    function fightersHit(resolve) {
+        return e => {
+            e.preventDefault();
+            pressed.add(e.code);
+            if (keyDownCobination('left')) {
+                const criticalHit = () => {
+                    showDamage(firstFighter, secondFighter, 'right', true);
+                };
+
+                throttleFunction(criticalHit, 'left');
+            }
+
+            if (keyDownCobination('right')) {
+                const criticalHit = () => {
+                    showDamage(secondFighter, firstFighter, 'left', true);
+                };
+                throttleFunction(criticalHit, 'right');
+            }
+
+            if (
+                (pressed.has(controls.PlayerOneAttack) && pressed.has(controls.PlayerTwoBlock)) ||
+                (pressed.has(controls.PlayerTwoAttack) && pressed.has(controls.PlayerOneBlock)) ||
+                (pressed.has(controls.PlayerOneAttack) && pressed.has(controls.PlayerOneBlock)) ||
+                (pressed.has(controls.PlayerTwoAttack) && pressed.has(controls.PlayerTwoBlock))
+            ) {
+                return;
+            }
+
+            if (pressed.has(controls.PlayerOneAttack)) {
+                showDamage(firstFighter, secondFighter, 'right');
+            }
+            if (pressed.has(controls.PlayerTwoAttack)) {
+                showDamage(secondFighter, firstFighter, 'left');
+            }
+
+            if (fightState.getHealth().left === 0 || fightState.getHealth().right === 0) {
+                const winner = fightState.getHealth().left === 0 ? secondFighter : firstFighter;
+                resolve(winner);
+            }
+        };
+    }
+
     return new Promise(resolve => {
-        const keyDownFun = fightersHit(firstFighter, secondFighter, resolve);
+        const keyDownFun = fightersHit(resolve);
 
         document.addEventListener('keydown', keyDownFun);
         document.addEventListener('keyup', e => {
