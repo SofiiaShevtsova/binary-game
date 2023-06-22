@@ -95,7 +95,7 @@ function fightersHit(firstFighter, secondFighter, resolve) {
         }
 
         if (fightState.getHealth().left === 0 || fightState.getHealth().right === 0) {
-            const winner = fightState.getHealth().left === 0 ? secondFighter : firstFighter;
+            const winner = !fightState.getHealth().right ? firstFighter : secondFighter;
             resolve(winner);
         }
     };
@@ -103,6 +103,7 @@ function fightersHit(firstFighter, secondFighter, resolve) {
 
 function removeKeyListener(func) {
     const onKeyup = e => {
+        e.preventDefault();
         pressed.delete(e.code);
         if (fightState.getHealth().left === 0 || fightState.getHealth().right === 0) {
             document.removeEventListener('keydown', func);
