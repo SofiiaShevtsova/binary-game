@@ -34,7 +34,6 @@ function throttleFunction(func, position) {
     if (idThrottle[position] === null) {
         func();
     }
-
     idThrottle[position] = setTimeout(() => {
         idThrottle[position] = null;
         document.querySelector(`#${position}-fighter-indicator`).style.backgroundColor = '#ebd759';
@@ -42,9 +41,6 @@ function throttleFunction(func, position) {
 }
 
 function keyDownCobination(position) {
-    if (pressed.size < 3) {
-        return false;
-    }
     if (position === 'left') {
         return controls.PlayerOneCriticalHitCombination.every(key => pressed.has(key));
     }
@@ -63,23 +59,25 @@ function fightersHit(firstFighter, secondFighter, resolve) {
         e.preventDefault();
         document.querySelector('.player-controls-box').classList.add('hidden');
         pressed.add(e.code);
-        if (keyDownCobination('left')) {
-            const criticalHit = () => {
-                showDamage(firstFighter, secondFighter, 'right', true);
-                document.querySelector(`#left-fighter-indicator`).style.backgroundColor = 'red';
-            };
+        if (pressed.size > 2) {
+            const left = keyDownCobination('left');
+            const right = keyDownCobination('right');
+            if (left) {
+                const criticalHit = () => {
+                    showDamage(firstFighter, secondFighter, 'right', true);
+                    document.querySelector(`#left-fighter-indicator`).style.backgroundColor = 'red';
+                };
 
-            throttleFunction(criticalHit, 'left');
+                throttleFunction(criticalHit, 'left');
+            }
+            if (right) {
+                const criticalHit = () => {
+                    showDamage(secondFighter, firstFighter, 'left', true);
+                    document.querySelector(`#right-fighter-indicator`).style.backgroundColor = 'red';
+                };
+                throttleFunction(criticalHit, 'right');
+            }
         }
-
-        if (keyDownCobination('right')) {
-            const criticalHit = () => {
-                showDamage(secondFighter, firstFighter, 'left', true);
-                document.querySelector(`#right-fighter-indicator`).style.backgroundColor = 'red';
-            };
-            throttleFunction(criticalHit, 'right');
-        }
-
         if (
             (pressed.has(controls.PlayerOneAttack) && pressed.has(controls.PlayerTwoBlock)) ||
             (pressed.has(controls.PlayerTwoAttack) && pressed.has(controls.PlayerOneBlock)) ||
@@ -103,17 +101,23 @@ function fightersHit(firstFighter, secondFighter, resolve) {
     };
 }
 
+function removeKeyListener(func) {
+    const onKeyup = e => {
+        pressed.delete(e.code);
+        if (fightState.getHealth().left === 0 || fightState.getHealth().right === 0) {
+            document.removeEventListener('keydown', func);
+            document.removeEventListener('keyup', onKeyup);
+        }
+    };
+    return onKeyup;
+}
+
 export async function fight(firstFighter, secondFighter) {
     showControlsInfo();
     return new Promise(resolve => {
         const keyDownFun = fightersHit(firstFighter, secondFighter, resolve);
 
         document.addEventListener('keydown', keyDownFun);
-        document.addEventListener('keyup', e => {
-            pressed.delete(e.code);
-            if (fightState.getHealth().left === 0 || fightState.getHealth().right === 0) {
-                document.removeEventListener('keydown', keyDownFun);
-            }
-        });
+        document.addEventListener('keyup', removeKeyListener(keyDownFun));
     });
 }
