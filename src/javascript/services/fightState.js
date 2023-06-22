@@ -18,10 +18,12 @@ class FightState {
                 this.#secondFighterHealth -= loseHealth;
             }
         }
-        if (this.#firstFighterHealth < loseHealth) {
-            this.#firstFighterHealth = 0;
-        } else {
-            this.#firstFighterHealth -= loseHealth;
+        if (fighter === 'left') {
+            if (this.#firstFighterHealth < loseHealth) {
+                this.#firstFighterHealth = 0;
+            } else {
+                this.#firstFighterHealth -= loseHealth;
+            }
         }
     }
 }
