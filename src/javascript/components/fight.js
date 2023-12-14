@@ -31,13 +31,11 @@ export function getDamage(attacker, defender) {
 }
 
 function throttleFunction(func, position) {
-    if (idThrottle[position] === null) {
-        func();
-    }
     idThrottle[position] = setTimeout(() => {
         idThrottle[position] = null;
         document.querySelector(`#${position}-fighter-indicator`).style.backgroundColor = '#ebd759';
     }, 10000);
+    func();
 }
 
 function keyDownCobination(position) {
@@ -68,14 +66,18 @@ function fightersHit(firstFighter, secondFighter, resolve) {
                     document.querySelector(`#left-fighter-indicator`).style.backgroundColor = 'red';
                 };
 
-                throttleFunction(criticalHit, 'left');
+                if (idThrottle.left === null) {
+                    throttleFunction(criticalHit, 'left');
+                }
             }
             if (right) {
                 const criticalHit = () => {
                     showDamage(secondFighter, firstFighter, 'left', true);
                     document.querySelector(`#right-fighter-indicator`).style.backgroundColor = 'red';
                 };
-                throttleFunction(criticalHit, 'right');
+                if (idThrottle.right === null) {
+                    throttleFunction(criticalHit, 'right');
+                }
             }
         }
         if (
